@@ -15,16 +15,9 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/tasks", response_model=list[schemas.TaskShow])
-def get_all_tasks(db: Session = Depends(get_db)):
-    try:
-        tasks = crud.get_all_tasks(db)
-        print(f"✅ 查到 {len(tasks)} 筆任務")
-        return tasks
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return JSONResponse(status_code=500, content={"error": str(e)})
+@app.get("/tasks")
+def test_simple():
+    return {"message": "後端有回應喔！"}
 
 
 @app.post("/tasks/complete")
