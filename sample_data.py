@@ -1,38 +1,31 @@
-# sample_data.py
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Task, TaskStatus
-from datetime import date, timedelta
+from datetime import date
 
 db: Session = SessionLocal()
 
-# 🔁 先清除現有資料（可選）
+# 🔁 清空資料（視情況使用）
 db.query(TaskStatus).delete()
 db.query(Task).delete()
 db.commit()
 
-# 建立兩天的模擬任務
-base_date = date.today()
-dl_dates = [base_date, base_date + timedelta(days=1)]
+# 任務日期
+task_date = date(2025, 4, 23)
 
-all_tasks = []
+# 模擬任務資料
+task_titles = [
+    f"{task_date} - OpenCV - 整理好全部每一個資料夾說明",
+    f"{task_date} - Vnsg - 跟皓庭說Server跑不動的問題"
+]
 
-for dl_date in dl_dates:
-    # 每天兩個大項目
-    for section_index in range(2):
-        section_name = f"Section {section_index + 1}"
+# 建立任務
+tasks = [
+    Task(title=title, date=task_date, required=True)
+    for title in task_titles
+]
 
-        # 每個 section 四個小項目
-        for item_index in range(4):
-            task_title = f"{dl_date} - {section_name} - 小任務 {item_index + 1}"
-            task = Task(
-                title=task_title,
-                date=dl_date,
-                required=True
-            )
-            all_tasks.append(task)
-
-db.add_all(all_tasks)
+db.add_all(tasks)
 db.commit()
 
-print(f"已建立 {len(all_tasks)} 筆任務資料。")
+print(f"✅ 已建立 {len(tasks)} 筆任務資料。")
