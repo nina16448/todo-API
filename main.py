@@ -20,9 +20,10 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/tasks", response_model=list[schemas.TaskShow], response_class=JSONResponse)
-def get_tasks(target_date: date, db: Session = Depends(get_db)):
-    return crud.get_tasks_by_date(db, target_date)
+@app.get("/tasks", response_model=list[schemas.TaskShow])
+def get_all_tasks(db: Session = Depends(get_db)):
+    return crud.get_all_tasks(db)
+
 
 
 @app.post("/tasks/complete")

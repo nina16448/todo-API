@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 import models, schemas
 from datetime import date, datetime
 
+def get_all_tasks(db: Session):
+    return db.query(models.Task).all()
+
+
 def get_tasks_by_date(db: Session, target_date: date):
     from datetime import date as dt_date
 
