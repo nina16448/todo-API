@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 import crud, models, schemas
 from database import SessionLocal, engine, Base
+from sqlalchemy import text  # 加上這行！
+
+
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,10 +19,11 @@ def get_db():
     finally:
         db.close()
         
+        
 @app.get("/debug-db")
 def test_db(db: Session = Depends(get_db)):
     try:
-        result = db.execute("SELECT COUNT(*) FROM tasks").fetchone()
+        result = db.execute(text("SELECT COUNT(*) FROM tasks")).fetchone()
         return {"total": result[0]}
     except Exception as e:
         import traceback
