@@ -32,18 +32,31 @@ def test_db(db: Session = Depends(get_db)):
 
 @app.get("/tasks")
 def get_all_tasks(db: Session = Depends(get_db)):
-    tasks = crud.get_all_tasks(db)
-    result = [
-        {
-            "id": task.id,
-            "title": task.title,
-            "date": task.date,
-            "required": task.required,
-            "expired": task.date < date.today()  # ✅ 這裡要小心用 date.today()
-        }
-        for task in tasks
-    ]
-    return result
+    try:
+        tasks = crud.get_all_tasks(db)
+
+        # 顯示目前的資料內容
+        for t in tasks:
+            print(f"[任務] ID: {t.id} / 標題: {t.title} / 日期: {t.date}")
+
+        result = [
+            {
+                "id": task.id,
+                "title": task.title,
+                "date": str(task.date),
+                "required": task.required,
+                "expired": task.date < date.today(),
+            }
+            for task in tasks
+        ]
+
+        print("✅ 資料處理完成")
+        return result
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 
