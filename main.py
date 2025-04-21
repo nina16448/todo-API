@@ -30,16 +30,21 @@ def test_db(db: Session = Depends(get_db)):
         traceback.print_exc()
         return {"error": str(e)}
 
-@app.get("/tasks", response_model=list[schemas.TaskShow])
+@app.get("/tasks")
 def get_all_tasks(db: Session = Depends(get_db)):
-    try:
-        tasks = crud.get_all_tasks(db)
-        print(f"✅ 查到 {len(tasks)} 筆任務")
-        return tasks
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return JSONResponse(status_code=500, content={"error": str(e)})
+    tasks = crud.get_all_tasks(db)
+    result = [
+        {
+            "id": task.id,
+            "title": task.title,
+            "date": task.date,
+            "required": task.required,
+            "expired": task.date < date.today()  # ✅ 這裡要小心用 date.today()
+        }
+        for task in tasks
+    ]
+    return result
+
 
 
 @app.post("/tasks/complete")
