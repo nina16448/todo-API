@@ -1,18 +1,13 @@
-# main.py
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
 import crud, models, schemas
 from database import SessionLocal, engine, Base
-from datetime import date
-from fastapi.responses import JSONResponse
-import json
-
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# 取得資料庫 session
 def get_db():
     db = SessionLocal()
     try:
@@ -24,8 +19,6 @@ def get_db():
 def get_all_tasks(db: Session = Depends(get_db)):
     return crud.get_all_tasks(db)
 
-
-
 @app.post("/tasks/complete")
 def mark_done(data: schemas.TaskComplete, db: Session = Depends(get_db)):
     return crud.complete_task(db, data.task_id, data.proof or "")
@@ -36,9 +29,4 @@ def mark_undone(data: schemas.UnfinishedReason, db: Session = Depends(get_db)):
 
 @app.post("/tasks/create")
 def create_task(data: schemas.TaskCreate, db: Session = Depends(get_db)):
-    new_task = models.Task(title=data.title, date=data.date)
-    db.add(new_task)
-    db.commit()
-    db.refresh(new_task)
-    return {"message": "新增成功", "id": new_task.id}
-
+    return crud.create_task(db, data)
