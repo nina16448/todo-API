@@ -4,6 +4,8 @@ from fastapi.responses import JSONResponse
 import crud, models, schemas
 from database import SessionLocal, engine, Base
 from sqlalchemy import text  # 加上這行！
+from datetime import date
+
 
 
 
@@ -35,7 +37,6 @@ def get_all_tasks(db: Session = Depends(get_db)):
     try:
         tasks = crud.get_all_tasks(db)
 
-        # 顯示目前的資料內容
         for t in tasks:
             print(f"[任務] ID: {t.id} / 標題: {t.title} / 日期: {t.date}")
 
