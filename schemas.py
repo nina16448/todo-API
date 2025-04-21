@@ -24,7 +24,3 @@ class TaskComplete(BaseModel):
 class UnfinishedReason(BaseModel):
     task_id: int
     reason: str
-
-class TaskCreate(BaseModel):
-    title: str
-    date: date
