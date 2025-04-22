@@ -1,13 +1,11 @@
 from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from fastapi.responses import JSONResponse
 import crud, models, schemas
 from database import SessionLocal, engine, Base
 from sqlalchemy import text  # 加上這行！
 from datetime import date
-
-
-
+from typing import List
 
 
 Base.metadata.create_all(bind=engine)
@@ -33,9 +31,9 @@ def test_db(db: Session = Depends(get_db)):
         return {"error": str(e)}
 
 @app.get("/tasks")
-def get_all_tasks(db: Session = Depends(get_db)):
+def get_all_tasks(db: Session = Depends(get_db)) -> List[schemas.TaskShow]:
     try:
-        tasks = crud.get_all_tasks(db)
+        tasks = db.query(models.Task).options(joinedload(models.Task.status)).all()
 
         for t in tasks:
             print(f"[任務] ID: {t.id} / 標題: {t.title} / 日期: {t.date}")
@@ -47,6 +45,9 @@ def get_all_tasks(db: Session = Depends(get_db)):
                 "date": str(task.date),
                 "required": task.required,
                 "expired": task.date < date.today(),
+                "completed": (task.status and task.status[0].is_done) or False,
+                "proof": task.status[0].proof if task.status else None,
+                "unfinished_reason": task.status[0].unfinished_reason if task.status else None,
             }
             for task in tasks
         ]
@@ -55,6 +56,7 @@ def get_all_tasks(db: Session = Depends(get_db)):
         return result
 
     except Exception as e:
+        
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})

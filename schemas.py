@@ -14,6 +14,10 @@ class TaskCreate(TaskBase):
 class TaskShow(TaskBase):
     id: int
     expired: bool
+    completed: bool
+    proof: Optional[str] = None
+    unfinished_reason: Optional[str] = None
+    
     class Config:
         orm_mode = True
 
