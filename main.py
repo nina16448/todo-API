@@ -30,33 +30,38 @@ def test_db(db: Session = Depends(get_db)):
         traceback.print_exc()
         return {"error": str(e)}
 
-@app.get("/tasks")
+
+@app.get("/tasks", response_model=List[schemas.TaskShow])
 def get_all_tasks(db: Session = Depends(get_db)) -> List[schemas.TaskShow]:
     try:
-        tasks = db.query(models.Task).options(joinedload(models.Task.status)).all()
+        # 一次把 Task 和對應的 TaskStatus 一併載入
+        tasks = (
+            db.query(models.Task)
+              .options(joinedload(models.Task.status))
+              .all()
+        )
 
         for t in tasks:
             print(f"[任務] ID: {t.id} / 標題: {t.title} / 日期: {t.date}")
 
         result = [
             {
-                "id": task.id,
-                "title": task.title,
-                "date": str(task.date),
-                "required": task.required,
-                "expired": task.date < date.today(),
-                "completed": (task.status and task.status[0].is_done) or False,
-                "proof": task.status[0].proof if task.status else None,
-                "unfinished_reason": task.status[0].unfinished_reason if task.status else None,
+                "id": t.id,
+                "title": t.title,
+                "date": str(t.date),
+                "required": t.required,
+                "expired": t.date < date.today(),
+                "completed": t.status[0].is_done if t.status else False,
+                "proof": t.status[0].proof if t.status else None,
+                "unfinished_reason": t.status[0].unfinished_reason if t.status else None,
             }
-            for task in tasks
+            for t in tasks
         ]
 
         print("✅ 資料處理完成")
         return result
 
     except Exception as e:
-        
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
