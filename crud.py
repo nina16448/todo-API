@@ -9,8 +9,10 @@ def complete_task(db: Session, task_id: int, proof: str):
     if not status:
         status = models.TaskStatus(task_id=task_id)
         db.add(status)
+    status.is_done = True
     status.proof = proof
     db.commit()
+    status.unfinished_reason = None
     return {"message": "任務已完成"}
 
 def submit_unfinished_reason(db: Session, task_id: int, reason: str):
@@ -18,7 +20,9 @@ def submit_unfinished_reason(db: Session, task_id: int, reason: str):
     if not status:
         status = models.TaskStatus(task_id=task_id)
         db.add(status)
+    status.is_done = False
     status.unfinished_reason = reason
+    status.proof = None
     db.commit()
     return {"message": "已儲存未完成原因"}
 
