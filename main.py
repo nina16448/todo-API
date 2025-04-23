@@ -8,7 +8,7 @@ from datetime import date
 from typing import List
 
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -30,7 +30,6 @@ def test_db(db: Session = Depends(get_db)):
         traceback.print_exc()
         return {"error": str(e)}
 
-
 @app.get("/tasks", response_model=List[schemas.TaskShow])
 def get_all_tasks(db: Session = Depends(get_db)) -> List[schemas.TaskShow]:
     try:
@@ -41,29 +40,29 @@ def get_all_tasks(db: Session = Depends(get_db)) -> List[schemas.TaskShow]:
               .all()
         )
 
+        today = date.today()
+        result = []
         for t in tasks:
-            print(f"[任務] ID: {t.id} / 標題: {t.title} / 日期: {t.date}")
+            status = t.status[0] if t.status else None
 
-        result = [
-            {
+            # 如果 t.required 是 None，就用 True 當作預設
+            required_val = t.required if t.required is not None else True
+
+            result.append({
                 "id": t.id,
                 "title": t.title,
                 "date": str(t.date),
-                "required": t.required,
-                "expired": t.date < date.today(),
-                "completed": t.status[0].is_done if t.status else False,
-                "proof": t.status[0].proof if t.status else None,
-                "unfinished_reason": t.status[0].unfinished_reason if t.status else None,
-            }
-            for t in tasks
-        ]
+                "required": required_val,                 # 這裡套用預設
+                "expired": t.date < today,
+                "completed": status.is_done if status else False,
+                "proof": status.proof if status else None,
+                "unfinished_reason": status.unfinished_reason if status else None,
+            })
 
-        print("✅ 資料處理完成")
         return result
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
