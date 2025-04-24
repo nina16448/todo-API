@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 class TaskBase(BaseModel):
     title: str
-    date: date
+    due_datetime: datetime
     required: bool = True
 
 class TaskCreate(TaskBase):

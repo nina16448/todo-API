@@ -7,7 +7,7 @@ from database import Base
 class Task(Base):
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, index=True)
+    due_datetime = Column(DateTime, index=True)
     title = Column(String)
     required = Column(Boolean, default=True)
 

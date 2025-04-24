@@ -51,7 +51,7 @@ def get_all_tasks(db: Session = Depends(get_db)) -> List[schemas.TaskShow]:
             result.append({
                 "id": t.id,
                 "title": t.title,
-                "date": str(t.date),
+                "due_datetime": t.due_datetime,
                 "required": required_val,                 # 這裡套用預設
                 "expired": t.date < today,
                 "completed": status.is_done if status else False,
