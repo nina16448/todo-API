@@ -33,27 +33,26 @@ def test_db(db: Session = Depends(get_db)):
 @app.get("/tasks", response_model=List[schemas.TaskShow])
 def get_all_tasks(db: Session = Depends(get_db)) -> List[schemas.TaskShow]:
     try:
-        # 一次把 Task 和對應的 TaskStatus 一併載入
+        # 一次把 Task 和它的 status 一併載入
         tasks = (
             db.query(models.Task)
               .options(joinedload(models.Task.status))
               .all()
         )
 
-        today = date.today()
+        now = datetime.now()
         result = []
         for t in tasks:
             status = t.status[0] if t.status else None
-
-            # 如果 t.required 是 None，就用 True 當作預設
+            # 保證 required 是布林值
             required_val = t.required if t.required is not None else True
 
             result.append({
                 "id": t.id,
                 "title": t.title,
-                "due_datetime": t.due_datetime,
-                "required": required_val,                 # 這裡套用預設
-                "expired": t.date < today,
+                "due_datetime": t.due_datetime,              # 原生 DateTime 物件，Pydantic 會自動轉 ISO
+                "required": required_val,
+                "expired": t.due_datetime < now,             # 用 due_datetime 判斷是否過期
                 "completed": status.is_done if status else False,
                 "proof": status.proof if status else None,
                 "unfinished_reason": status.unfinished_reason if status else None,
