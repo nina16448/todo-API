@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import crud, models, schemas
 from database import SessionLocal, engine, Base
 from sqlalchemy import text  # 加上這行！
-from datetime import date
+from datetime import datetime
 from typing import List
 
 
